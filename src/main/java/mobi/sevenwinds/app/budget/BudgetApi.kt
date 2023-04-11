@@ -11,10 +11,11 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import org.jetbrains.annotations.Nullable
+import org.joda.time.DateTime
 
 fun NormalOpenAPIRoute.budget() {
     route("/budget") {
-        route("/add").post<Unit, BudgetRecord, BudgetRecord>(info("Добавить запись")) { param, body ->
+        route("/add").post<Unit, BudgetRecordResponse, BudgetRecordRequest>(info("Добавить запись")) { param, body ->
             respond(BudgetService.addRecord(body))
         }
 
@@ -26,14 +27,21 @@ fun NormalOpenAPIRoute.budget() {
     }
 }
 
-data class BudgetRecord(
+data class BudgetRecordRequest(
     @Min(1900) val year: Int,
     @Min(1) @Max(12) val month: Int,
     @Min(1) val amount: Int,
     val type: BudgetType,
     @Nullable
     val authorId: Int? = null
-
+)
+data class BudgetRecordResponse(
+    @Min(1900) val year: Int,
+    @Min(1) @Max(12) val month: Int,
+    @Min(1) val amount: Int,
+    val type: BudgetType,
+    val authorFullname:String? = "",
+    val authorCreationDate:DateTime?
 )
 
 data class BudgetYearParam(
@@ -45,7 +53,7 @@ data class BudgetYearParam(
 class BudgetYearStatsResponse(
     val total: Int,
     val totalByType: Map<String, Int>,
-    val items: List<BudgetRecord>
+    val items: List<BudgetRecordResponse>
 )
 
 enum class BudgetType {
